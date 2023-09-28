@@ -1,3 +1,5 @@
+/// <reference path='../typings/XRM/xrm.d.ts' />
+
 var PMS = window.PMS || {};
 
 (function () {
@@ -14,15 +16,29 @@ var PMS = window.PMS || {};
 
       if (permitType == null) {
         formContext.ui.tabs.get("inspectionsTab").setVisible(false);
+        formContext.getAttribute("pms_requiresize").setRequiredLevel("none");
+        formContext.ui.controls.get("pms_newsize").setVisible(false);
         return;
       } else {
         let permitTypeId = permitType[0].id;
         Xrm.WebApi.retrieveRecord("pms_permittype", permitTypeId).then(
           (result) => {
-            if (result.pms_requireinspections) {
+            if (result.pms_requireinspection) {
               formContext.ui.tabs.get("inspectionsTab").setVisible(true);
             } else {
-              formContext.ui.tabs.get("inspectionsTab").setVisible(true);
+              formContext.ui.tabs.get("inspectionsTab").setVisible(false);
+            }
+
+            if (result.pms_requiresize) {
+              formContext.ui.controls.get("pms_newsize").setVisible(true);
+              formContext
+                .getAttribute("pms_newsize")
+                .setRequiredLevel("required");
+              
+            } else {
+              formContext.getAttribute("pms_newsize").setRequiredLevel("none");
+              formContext.ui.controls.get("pms_newsize").setVisible(false);
+
             }
           },
           (error) => alert("Error " + error.message)
