@@ -1,89 +1,106 @@
-/// <reference path='../typings/XRM/xrm.d.ts' />
-
 var PMS = window.PMS || {};
 
-(function () {
-  (this.handleOnLoad = function (executionContext) {
-    PMS.handlePermitTypeSettings(executionContext);
-    console.log("On load - Permit form");
-  }),
-    (this.handleOnChange = function (executionContext) {
-      console.log("On change - Permit type");
-    }),
-    (this.handlePermitTypeSettings = function (executionContext) {
-      let formContext = executionContext.getFormContext();
-      let permitType = formContext.getAttribute("pms_permittype").getValue();
+if (typeof PMS === "undefined") {
+  PMS = { __namespace: true };
+}
 
-      if (permitType == null) {
+if (typeof PMS.Permit === "undefined") {
+  PMS.Permit = { __namespace: true };
+}
+
+(function() {
+  PMS.Permit.Scripts = {
+    handleOnLoad: function(executionContext) {
+      console.log("on load - permit form");
+      this._handlePermitTypeSettings(executionContext);
+    },
+
+    handleOnChange: function(executionContext) {
+      console.log("on change - permit type");
+      this._handlePermitTypeSettings(executionContext);
+    },
+
+    _handlePermitTypeSettings: function(executionContext) {
+      console.log("handlePermitTypeSettings");
+      var formContext = executionContext.getFormContext();
+      var permitType = formContext.getAttribute("pms_permittype").getValue();
+
+      if (permitType === null) {
+        console.log("permitType null");
         formContext.ui.tabs.get("inspectionsTab").setVisible(false);
-        formContext.getAttribute("pms_requiresize").setRequiredLevel("none");
+        formContext.getAttribute("pms_newsize").setRequiredLevel("none");
         formContext.ui.controls.get("pms_newsize").setVisible(false);
         return;
       } else {
-        let permitTypeId = permitType[0].id;
-        Xrm.WebApi.retrieveRecord("pms_permittype", permitTypeId).then(
-          (result) => {
-            if (result.pms_requireinspection) {
+        var permitTypeID = permitType[0]?.id;
+        console.log("permitType =" + permitTypeID);
+        Xrm.WebApi.retrieveRecord("pms_permittype", permitTypeID).then(
+          function(result) {
+            if (result.pms_requireinspections) {
+              console.log("requireinspections");
               formContext.ui.tabs.get("inspectionsTab").setVisible(true);
             } else {
+              console.log("not requireinspections");
               formContext.ui.tabs.get("inspectionsTab").setVisible(false);
             }
-
             if (result.pms_requiresize) {
+              console.log("requiresize");
               formContext.ui.controls.get("pms_newsize").setVisible(true);
-              formContext
-                .getAttribute("pms_newsize")
-                .setRequiredLevel("required");
+              formContext.getAttribute("pms_newsize").setRequiredLevel("required");
             } else {
+              console.log("not requiresize");
               formContext.getAttribute("pms_newsize").setRequiredLevel("none");
               formContext.ui.controls.get("pms_newsize").setVisible(false);
             }
           },
-          (error) => alert("Error " + error.message)
+          function(error) {
+            alert("Error:" + error.message);
+          }
         );
       }
-    }),
-    (this.lockPermitRequest = function (permitId, reason) {
-      this.entity = { entityType: "pms_permit", id: permitId };
-      this.reason = reason;
+    },
 
-      this.getMetadata = function () {
+    _lockPermitRequest: function(permitID, reason) {
+      console.log("_lockPermitRequest");
+      this.entity = { entityType: "pms_permit", id: permitID };
+      this.Reason = reason;
+      this.getMetadata = function() {
         return {
-          bounParameter: "entity",
-          paramterTypes: {
+          boundParameter: "entity",
+          parameterTypes: {
             entity: {
               typeName: "mscrm.pms_permit",
-              structuralProperty: 5,
+              structuralProperty: 5
             },
             Reason: {
               typeName: "Edm.String",
-              structuralProperty: 1, // Primitive Type
-            },
+              structuralProperty: 1
+            }
           },
-          operationType: 0, // action. 1 for function, 2 for CRUD
-          operationName: "pms_LockPermit",
+          operationType: 0,
+          operationName: "pms_LockPermit"
         };
       };
-    }),
-    (this.lockPermit = function (primaryControl) {
-      formContext = primaryControl;
-      let permitId = formContext.data.entity
-        .getId()
-        .replace("{", "")
-        .replace("}", "");
-      let lockPermitRequest = new PMS.lockPermitRequest(permitId, "Admin Lock");
+    },
+
+    lockPermit: function(primaryControl) {
+      console.log("lockPermit");
+      var formContext = primaryControl;
+      var PermitID = formContext.data.entity.getId().replace("{", "").replace("}", "");
+      var lockPermitRequest = new PMS.Permit.Scripts._lockPermitRequest(PermitID, "Admin Lock");
 
       Xrm.WebApi.online.execute(lockPermitRequest).then(
-        (result) => {
+        function(result) {
           if (result.ok) {
-            console.log(`status: ${result.status}, ${result.statusText}`);
-            formContext.ui.setFormNotification(
-              "Status " + result.status,
-              "INFORMATION"
-            );
+            console.log("Status: %s %s", result.status, result.statusText);
+            formContext.ui.setFormNotification("Status " + result.status, "INFORMATION");
           }
         },
-        (error) => console.log(error.message)
+        function(error) {
+          console.log(error.message);
+        }
       );
-    });
+    },
+    __namespace: true
+  };
 }).call(PMS);
