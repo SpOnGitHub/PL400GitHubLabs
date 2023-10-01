@@ -9,7 +9,7 @@ using CrmEarlyBound;
 Console.WriteLine("Permit Console -- PL 400 Github Labs");
 
 string connectionString = @$"AuthType=OAuth; Username=sp@0ks63.onmicrosoft.com;
-                            Password=Sangay1987;url=https://pldevelopment.crm.dynamics.com/; AppId=51f81489-12ee-4a9e-aaae-a2591f45987d;
+                            Password=Password;url=https://pldevelopment.crm.dynamics.com/; AppId=51f81489-12ee-4a9e-aaae-a2591f45987d;
                             RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97; LoginPrompt=Auto";
 
 try
