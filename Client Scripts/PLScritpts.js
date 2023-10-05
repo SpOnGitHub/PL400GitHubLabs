@@ -37,7 +37,7 @@ if (typeof PMS.Permit === "undefined") {
         console.log("permitType =" + permitTypeID);
         Xrm.WebApi.retrieveRecord("pms_permittype", permitTypeID).then(
           function(result) {
-            if (result.pms_requireinspections) {
+            if (result.pms_requireinspection) {
               console.log("require inspection");
               formContext.ui.tabs.get("inspectionsTab").setVisible(true);
             } else {
