@@ -31,16 +31,17 @@ if (typeof PMS.Permit === "undefined") {
         formContext.getAttribute("pms_newsize").setRequiredLevel("none");
         formContext.ui.controls.get("pms_newsize").setVisible(false);
         return;
+
       } else {
         var permitTypeID = permitType[0]?.id;
         console.log("permitType =" + permitTypeID);
         Xrm.WebApi.retrieveRecord("pms_permittype", permitTypeID).then(
           function(result) {
             if (result.pms_requireinspections) {
-              console.log("requireinspections");
+              console.log("require inspection");
               formContext.ui.tabs.get("inspectionsTab").setVisible(true);
             } else {
-              console.log("not requireinspections");
+              console.log("does not require inspection");
               formContext.ui.tabs.get("inspectionsTab").setVisible(false);
             }
             if (result.pms_requiresize) {
